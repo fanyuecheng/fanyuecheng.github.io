@@ -1,0 +1,277 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>iOS原生社会化分享 | fanyuecheng&#39;s blog</title>
+<link rel="shortcut icon" href="https://fanyuecheng.github.io/favicon.ico?v=1609836514785">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.3.0/fonts/remixicon.css" rel="stylesheet">
+<link rel="stylesheet" href="https://fanyuecheng.github.io/styles/main.css">
+<link rel="alternate" type="application/atom+xml" title="iOS原生社会化分享 | fanyuecheng&#39;s blog - Atom Feed" href="https://fanyuecheng.github.io/atom.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+    <meta name="description" content="UIActivityViewController
+NSString *textToShare = @&quot;分享的标题&quot;;   
+UIImage *imageToShare = [UIImage imageNamed:@&qu..." />
+    <meta name="keywords" content="iOS" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+    <script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://fanyuecheng.github.io">
+  <img class="avatar" src="https://fanyuecheng.github.io/images/avatar.png?v=1609836514785" alt="">
+  </a>
+  <h1 class="site-title">
+    fanyuecheng&#39;s blog
+  </h1>
+  <p class="site-description">
+    温故而知新
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+        <a href="https://github.com/fanyuecheng" target="_blank">
+          <i class="ri-github-line"></i>
+        </a>
+      
+    
+      
+    
+      
+        <a href="https://weibo.com/u/2655676894" target="_blank">
+          <i class="ri-weibo-line"></i>
+        </a>
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              iOS原生社会化分享
+            </h2>
+            <div class="post-info">
+              <span>
+                2021-01-05
+              </span>
+              <span>
+                2 min read
+              </span>
+              
+                <a href="https://fanyuecheng.github.io/tag/O7CC6q2Ky/" class="post-tag">
+                  # iOS
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h2 id="uiactivityviewcontroller">UIActivityViewController</h2>
+<pre><code>NSString *textToShare = @&quot;分享的标题&quot;;   
+UIImage *imageToShare = [UIImage imageNamed:@&quot;test.jpg&quot;];   
+NSURL *urlToShare = [NSURL URLWithString:@&quot;http://www.baidu.com&quot;];  
+//NSURL * urlToShare = [[NSBundle mainBundle] URLForResource:@&quot;test&quot; withExtension:@&quot;zip&quot;];  
+
+NSArray *activityItems = @[textToShare, imageToShare, urlToShare];  
+UIActivityViewController *activityVC = [[UIActivityViewController alloc]initWithActivityItems:activityItems applicationActivities:nil];  
+
+/*
+ 不想显示的type
+ activityVC.excludedActivityTypes = @[];
+ 点击的回调
+ activityVC.completionWithItemsHandler = 
+ */
+
+[self presentViewController:activityVC animated:YES completion:nil];  
+</code></pre>
+<h2 id="social-framework">Social Framework</h2>
+<pre><code>#import &lt;Social/Social.h&gt;  
+
+SLComposeViewController *composeVc = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeSinaWeibo];  
+
+if (composeVc == nil){  
+    NSLog(@&quot;未安装软件&quot;);  
+    return;  
+}  
+
+if (![SLComposeViewController isAvailableForServiceType:SLServiceTypeSinaWeibo]) {  
+    NSLog(@&quot;软件未配置登录信息&quot;);  
+    return;  
+}  
+
+//添加分享的文字、图片、链接  
+[composeVc setInitialText:@&quot;要分享的文本内容&quot;];  
+[composeVc addImage:[UIImage imageNamed:@&quot;choice_highlight&quot;]];  
+[composeVc addURL:[NSURL URLWithString:@&quot;http://www.baidu.com&quot;]];  
+[self presentViewController:composeVc animated:YES completion:nil];  
+//监听用户点击了取消还是发送  
+
+composeVc.completionHandler = ^(SLComposeViewControllerResult result){
+
+    if (result == SLComposeViewControllerResultCancelled) {
+
+    } else {
+    
+    }
+};
+</code></pre>
+<p>系统只提供了下面几种分享平台：</p>
+<pre><code>SLServiceTypeTwitter;  
+SLServiceTypeFacebook;  
+SLServiceTypeSinaWeibo;  
+SLServiceTypeTencentWeibo;  
+SLServiceTypeLinkedIn;
+</code></pre>
+<p>实际可以根据id来分享到更多平台，如微信:</p>
+<pre><code>NSString *socialType = @&quot;com.tencent.xin.sharetimeline&quot;;  
+SLComposeViewController *composeVC = [SLComposeViewController composeViewControllerForServiceType:socialType];
+</code></pre>
+<p>可以这么使用的原因是:iOS8之后系统推出的Share Extension,不是系统实现了微信分享，而是微信App的Share Extension提供了分享入口。所以这个不是私有API，可以放心使用，想获取手机中装的App的所有Share Extension的方法。只需调用下面一句代码。</p>
+<pre><code>SLComposeViewController *composeVc = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeSinaWeibo];
+</code></pre>
+<p>看看控制台输出，手机内所有可用的Share Extension的bundle Id 都出来了。<br>
+<img src="https://i.loli.net/2020/01/08/TOh7p4qzlMokFxV.png" alt="img" loading="lazy"></p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li><a href="#uiactivityviewcontroller">UIActivityViewController</a></li>
+<li><a href="#social-framework">Social Framework</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://fanyuecheng.github.io/post/wo-kan-nsoperation-he-nsoperationqueue/">
+              <h3 class="post-title">
+                我看NSOperation和NSOperationQueue
+              </h3>
+            </a>
+          </div>
+        
+
+        
+          
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+<div id="gitalk-container"></div>
+
+<script>
+
+  var gitalk = new Gitalk({
+    clientID: '086416f3d68dc7e21533',
+    clientSecret: 'dde43685f6b0fe5d2037ef7ac3ddc6dc5e0d1dca',
+    repo: 'https://fanyuecheng.github.io',
+    owner: 'fanyuecheng',
+    admin: ['fanyuecheng'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+
+  gitalk.render('gitalk-container')
+
+</script>
+
+          
+
+          
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+  <a class="rss" href="https://fanyuecheng.github.io/atom.xml" target="_blank">
+    <i class="ri-rss-line"></i> RSS
+  </a>
+</div>
+
+      </div>
+    </div>
+
+    <script>
+      hljs.initHighlightingOnLoad()
+
+      let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+      // This should probably be throttled.
+      // Especially because it triggers during smooth scrolling.
+      // https://lodash.com/docs/4.17.10#throttle
+      // You could do like...
+      // window.addEventListener("scroll", () => {
+      //    _.throttle(doThatStuff, 100);
+      // });
+      // Only not doing it here to keep this Pen dependency-free.
+
+      window.addEventListener("scroll", event => {
+        let fromTop = window.scrollY;
+
+        mainNavLinks.forEach((link, index) => {
+          let section = document.getElementById(decodeURI(link.hash).substring(1));
+          let nextSection = null
+          if (mainNavLinks[index + 1]) {
+            nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+          }
+          if (section.offsetTop <= fromTop) {
+            if (nextSection) {
+              if (nextSection.offsetTop > fromTop) {
+                link.classList.add("current");
+              } else {
+                link.classList.remove("current");    
+              }
+            } else {
+              link.classList.add("current");
+            }
+          } else {
+            link.classList.remove("current");
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>
