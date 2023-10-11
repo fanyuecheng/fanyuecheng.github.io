@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>Block的循环引用详解 | fanyuecheng&#39;s blog</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://fanyuecheng.github.io/favicon.ico?v=1696999272056">
+<link rel="stylesheet" href="https://fanyuecheng.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="什么情况下block会造成循环引用
+ARC 情况下block为了保证代码块内部对象不被提前释放，会对block中的对象进行强引用，就相当于持有了其中的对象，而如果此时block中的对象又持有了该block，就会造成循环引用。
+常见误区
+
+所..." />
+    <meta name="keywords" content="iOS" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://fanyuecheng.github.io">
+        <img src="https://fanyuecheng.github.io/images/avatar.png?v=1696999272056" class="site-logo">
+        <h1 class="site-title">fanyuecheng&#39;s blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://fanyuecheng.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">Block的循环引用详解</h2>
+            <div class="post-date">2022-03-03</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="什么情况下block会造成循环引用">什么情况下block会造成循环引用</h2>
+<p>ARC 情况下<code>block</code>为了保证代码块内部对象不被提前释放，会对<code>block</code>中的对象进行强引用，就相当于持有了其中的对象，而如果此时<code>block</code>中的对象又持有了该<code>block</code>，就会造成循环引用。</p>
+<h2 id="常见误区">常见误区</h2>
+<ul>
+<li>所有block都会造成循环引用</li>
+</ul>
+<ol>
+<li>UIView的block动画不会造成循环引用。类方法不能强引用一个类，所以不会造成循环引用。</li>
+<li>Masonry约束block不会造成循环引用。view并没有持有该block。</li>
+<li>AFN、YTKNetwork等请求回调block不会造成循环引用。因为在block执行后，主动释放了block。<br>
+但是以上三种情况依然 <code>weakSelf</code>、<code>strongSelf</code>结合使用不影响。</li>
+</ol>
+<ul>
+<li>block中只有self会造成循环引用<br>
+用下划线调用属性(如_name)也会出现循环引用，效果和使用self是一样的，因为内部会用self-&gt;name去查找。</li>
+<li>通过<code> __weak __typeof(self) weakSelf = self;</code> 可以解决所有block造成的循环引用<br>
+大部分情况下，这样使用是可以解决block循环引用，但是有些情况下这样使用会造成一些问题，比如在block中延迟执行一些代码，在还没有执行的时候，控制器被销毁了，这样控制器中的对象也会被释放，__weak对象就会变成null。所以会输出null。<code>__strong __typeof(weakSelf)strongSelf = weakSelf;</code>可解。</li>
+</ul>
+<h2 id="如何避免">如何避免</h2>
+<ul>
+<li><code>weakSelf</code>、<code>strongSelf</code>结合使用。</li>
+<li>block的外部对象使用<code>weak</code>，比如用<code>weak</code>修饰property。</li>
+<li>将持有block的对象置空，或者block执行后将block置空。如：</li>
+</ul>
+<pre><code>self.one = [[TestObject alloc] init];
+self.two = [[TestObject alloc] init]; 
+self.one.blockProperty = ^{
+    NSLog(@&quot;%@&quot;, _two);
+};
+self.one.blockProperty();
+self.one.blockProperty = nil;
+或者 self.one = nil;
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://fanyuecheng.github.io/tag/O7CC6q2Ky/" class="tag">
+                    iOS
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://fanyuecheng.github.io/post/uinavigationbar-bu-ju/">
+                  <h3 class="post-title">
+                    UINavigationbar布局
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: '086416f3d68dc7e21533',
+        clientSecret: 'dde43685f6b0fe5d2037ef7ac3ddc6dc5e0d1dca',
+        repo: 'fanyuecheng.github.io',
+        owner: 'fanyuecheng',
+        admin: ['fanyuecheng'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

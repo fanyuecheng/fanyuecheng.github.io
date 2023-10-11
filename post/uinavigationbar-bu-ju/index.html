@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>UINavigationbar布局 | fanyuecheng&#39;s blog</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://fanyuecheng.github.io/favicon.ico?v=1696999272056">
+<link rel="stylesheet" href="https://fanyuecheng.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="设备：iPhone 13 Pro 模拟器  iOS 15
+默认显示
+
+1.Title
+textAttributes:
+font:font-family: &quot;UICTFontTextStyleShortEmphasizedBody&..." />
+    <meta name="keywords" content="iOS" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://fanyuecheng.github.io">
+        <img src="https://fanyuecheng.github.io/images/avatar.png?v=1696999272056" class="site-logo">
+        <h1 class="site-title">fanyuecheng&#39;s blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://fanyuecheng.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">UINavigationbar布局</h2>
+            <div class="post-date">2021-10-12</div>
+            
+            <div class="post-content" v-pre>
+              <h3 id="设备iphone-13-pro-模拟器-ios-15">设备：iPhone 13 Pro 模拟器  iOS 15</h3>
+<h4 id="默认显示">默认显示</h4>
+<figure data-type="image" tabindex="1"><img src="https://i.loli.net/2021/10/12/U65zIMeZh74lroE.png" alt="bar.png" loading="lazy"></figure>
+<p>1.Title<br>
+textAttributes:<br>
+font:<code>font-family: &quot;UICTFontTextStyleShortEmphasizedBody&quot;; font-weight: bold; font-style: normal; font-size: 17.00pt </code><br>
+textColor:<code>labelColor</code><br>
+UI:<code>UIlabel</code></p>
+<p>2.BarButtonItem<br>
+font:<br>
+Plain：<code>font-family: &quot;UICTFontTextStyleEmphasizedBody&quot;; font-weight: bold; font-style: normal; font-size: 17.00pt</code><br>
+Done：<code>font-family: &quot;UICTFontTextStyleBody&quot;; font-weight: normal; font-style: normal; font-size: 17.00pt</code><br>
+textColor:<code>systemBlueColor</code><br>
+UI:<code>_UIButtonBarStackView -&gt; _UIButtonBarButton -&gt; _UIModernBarButton -&gt; UIButtonLabel</code><br>
+<img src="https://i.loli.net/2021/10/12/RDrIm1lHYdaCfgA.png" alt="item.png" loading="lazy"></p>
+<h4 id="默认布局">默认布局</h4>
+<p>1.正常情况<br>
+<img src="https://i.loli.net/2021/10/12/vUPMWoBi2gKycfT.png" alt="bar.png" loading="lazy"><br>
+可通过<code>UIBarButtonItemStateAppearance </code>的<code>titlePositionAdjustment</code>属性来调整<code>_UIModernBarButton </code>的位置<br>
+2.特殊情况<br>
+1).仅有 LeftBarButtonItem 或 RightBarButtonItem<br>
+<a href="https://imgtu.com/i/5mPOu8"><img src="https://z3.ax1x.com/2021/10/12/5mPOu8.png" alt="item.png" loading="lazy"></a><br>
+<a href="https://imgtu.com/i/5miC3q"><img src="https://z3.ax1x.com/2021/10/12/5miC3q.png" alt="item.png" loading="lazy"></a><br>
+2).仅有title<br>
+title居中，最宽时前后8距离<br>
+<a href="https://imgtu.com/i/5mki0U"><img src="https://z3.ax1x.com/2021/10/12/5mki0U.png" alt="title.png" loading="lazy"></a><br>
+3).有title和item<br>
+item优先级高于title，会优先显示item，并且title可能会显示不全甚至无法显示<br>
+title距离item 6<br>
+<a href="https://imgtu.com/i/5mivM6"><img src="https://z3.ax1x.com/2021/10/12/5mivM6.png" alt="item.png" loading="lazy"></a><br>
+4).BackBarButtonItem<br>
+iOS14以后可通过设置<code>navigationItem.backButtonDisplayMode</code>来控制BackBarButtonItem的显示模式。<br>
+默认状态下，BackBarButtonItem显示&quot;&lt;&quot; + title<br>
+title过长，则显示 &quot;&lt;&quot; + &quot;Back&quot;<br>
+title超级长，则只显示 &quot;&lt;&quot;</p>
+<p>5).BarButtonItems<br>
+可通过设<code>UIBarButtonSystemItemFixedSpace</code>类型的item调整item之间的距离，默认8<br>
+items数组，index从小到大，是从屏幕边向内侧的顺序排列，其中index为0的item后无空隙，其余有3的空隙，不知为何<br>
+<a href="https://imgtu.com/i/5mUUvq"><img src="https://z3.ax1x.com/2021/10/12/5mUUvq.png" alt="items.png" loading="lazy"></a></p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://fanyuecheng.github.io/tag/O7CC6q2Ky/" class="tag">
+                    iOS
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://fanyuecheng.github.io/post/uifont-ge-shu-xing-tu-jie/">
+                  <h3 class="post-title">
+                    UIFont 各属性图解
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: '086416f3d68dc7e21533',
+        clientSecret: 'dde43685f6b0fe5d2037ef7ac3ddc6dc5e0d1dca',
+        repo: 'fanyuecheng.github.io',
+        owner: 'fanyuecheng',
+        admin: ['fanyuecheng'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

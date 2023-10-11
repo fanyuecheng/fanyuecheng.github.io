@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>使用UIStackView组成常见UI样式 | fanyuecheng&#39;s blog</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://fanyuecheng.github.io/favicon.ico?v=1696999272056">
+<link rel="stylesheet" href="https://fanyuecheng.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="前言
+目前有一种UI设计，简单来说就是各种小的，种类不同的子视图堆叠，常见于各大App列表中，比如外卖软件商家列表里面的各种tag堆叠，社交App个人信息里的各种tag堆叠等等。 这时候使用UIStackView往往会有事半功倍的奇效。鉴于..." />
+    <meta name="keywords" content="" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://fanyuecheng.github.io">
+        <img src="https://fanyuecheng.github.io/images/avatar.png?v=1696999272056" class="site-logo">
+        <h1 class="site-title">fanyuecheng&#39;s blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://fanyuecheng.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">使用UIStackView组成常见UI样式</h2>
+            <div class="post-date">2022-06-16</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="前言">前言</h2>
+<p>目前有一种UI设计，简单来说就是各种小的，种类不同的子视图堆叠，常见于各大App列表中，比如外卖软件商家列表里面的各种tag堆叠，社交App个人信息里的各种tag堆叠等等。 这时候使用UIStackView往往会有事半功倍的奇效。鉴于对于UIStackView详细介绍的文章太多这里就不再过多赘述，仅写一简单使用范例。<br>
+<a href="https://imgtu.com/i/XHNj1O"><img src="https://s1.ax1x.com/2022/06/16/XHNj1O.md.png" alt="XHNj1O.md.png" loading="lazy"></a></p>
+<h2 id="简单使用">简单使用</h2>
+<p>1.创建UIStackView，并添加需要显示的子视图。</p>
+<pre><code>_stackView = [[UIStackView alloc] init];
+_stackView.spacing = 5;
+_stackView.axis = UILayoutConstraintAxisHorizontal;
+_stackView.alignment = UIStackViewAlignmentCenter; 
+[_stackView addArrangedSubview:self.nameLabel];
+[_stackView addArrangedSubview:self.boutiqueView];
+[_stackView addArrangedSubview:self.qualityView];
+[_stackView addArrangedSubview:self.scheduleLabel];
+[_stackView setCustomSpacing:2 afterView:self.boutiqueView];  
+</code></pre>
+<p>2.布局UIStackView<br>
+使用<strong>约束</strong>给UIStackView布局，一般情况只需top,left,right即可。<br>
+根据数据条件，控制子视图显隐即可。<br>
+3.特别的<br>
+如果子视图长度超过UIStackView，可以设置子视图的约束优先级，优先挤压某个子视图即可。</p>
+<pre><code>- (void)setContentCompressionResistancePriority:(UILayoutPriority)priority forAxis:(UILayoutConstraintAxis)axis API_AVAILABLE(ios(6.0));
+</code></pre>
+
+            </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://fanyuecheng.github.io/post/block-de-xun-huan-yin-yong-xiang-jie/">
+                  <h3 class="post-title">
+                    Block的循环引用详解
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: '086416f3d68dc7e21533',
+        clientSecret: 'dde43685f6b0fe5d2037ef7ac3ddc6dc5e0d1dca',
+        repo: 'fanyuecheng.github.io',
+        owner: 'fanyuecheng',
+        admin: ['fanyuecheng'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>iOS原生社会化分享 | fanyuecheng&#39;s blog</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://fanyuecheng.github.io/favicon.ico?v=1696999272056">
+<link rel="stylesheet" href="https://fanyuecheng.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="UIActivityViewController
+NSString *textToShare = @&quot;分享的标题&quot;;   
+UIImage *imageToShare = [UIImage imageNamed:@&qu..." />
+    <meta name="keywords" content="iOS" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://fanyuecheng.github.io">
+        <img src="https://fanyuecheng.github.io/images/avatar.png?v=1696999272056" class="site-logo">
+        <h1 class="site-title">fanyuecheng&#39;s blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://fanyuecheng.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">iOS原生社会化分享</h2>
+            <div class="post-date">2021-01-05</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="uiactivityviewcontroller">UIActivityViewController</h2>
+<pre><code>NSString *textToShare = @&quot;分享的标题&quot;;   
+UIImage *imageToShare = [UIImage imageNamed:@&quot;test.jpg&quot;];   
+NSURL *urlToShare = [NSURL URLWithString:@&quot;http://www.baidu.com&quot;];  
+//NSURL * urlToShare = [[NSBundle mainBundle] URLForResource:@&quot;test&quot; withExtension:@&quot;zip&quot;];  
+
+NSArray *activityItems = @[textToShare, imageToShare, urlToShare];  
+UIActivityViewController *activityVC = [[UIActivityViewController alloc]initWithActivityItems:activityItems applicationActivities:nil];  
+
+/*
+ 不想显示的type
+ activityVC.excludedActivityTypes = @[];
+ 点击的回调
+ activityVC.completionWithItemsHandler = 
+ */
+
+[self presentViewController:activityVC animated:YES completion:nil];  
+</code></pre>
+<h2 id="social-framework">Social Framework</h2>
+<pre><code>#import &lt;Social/Social.h&gt;  
+
+SLComposeViewController *composeVc = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeSinaWeibo];  
+
+if (composeVc == nil){  
+    NSLog(@&quot;未安装软件&quot;);  
+    return;  
+}  
+
+if (![SLComposeViewController isAvailableForServiceType:SLServiceTypeSinaWeibo]) {  
+    NSLog(@&quot;软件未配置登录信息&quot;);  
+    return;  
+}  
+
+//添加分享的文字、图片、链接  
+[composeVc setInitialText:@&quot;要分享的文本内容&quot;];  
+[composeVc addImage:[UIImage imageNamed:@&quot;choice_highlight&quot;]];  
+[composeVc addURL:[NSURL URLWithString:@&quot;http://www.baidu.com&quot;]];  
+[self presentViewController:composeVc animated:YES completion:nil];  
+//监听用户点击了取消还是发送  
+
+composeVc.completionHandler = ^(SLComposeViewControllerResult result){
+
+    if (result == SLComposeViewControllerResultCancelled) {
+
+    } else {
+    
+    }
+};
+</code></pre>
+<p>系统只提供了下面几种分享平台：</p>
+<pre><code>SLServiceTypeTwitter;  
+SLServiceTypeFacebook;  
+SLServiceTypeSinaWeibo;  
+SLServiceTypeTencentWeibo;  
+SLServiceTypeLinkedIn;
+</code></pre>
+<p>实际可以根据id来分享到更多平台，如微信:</p>
+<pre><code>NSString *socialType = @&quot;com.tencent.xin.sharetimeline&quot;;  
+SLComposeViewController *composeVC = [SLComposeViewController composeViewControllerForServiceType:socialType];
+</code></pre>
+<p>可以这么使用的原因是:iOS8之后系统推出的Share Extension,不是系统实现了微信分享，而是微信App的Share Extension提供了分享入口。所以这个不是私有API，可以放心使用，想获取手机中装的App的所有Share Extension的方法。只需调用下面一句代码。</p>
+<pre><code>SLComposeViewController *composeVc = [SLComposeViewController composeViewControllerForServiceType:SLServiceTypeSinaWeibo];
+</code></pre>
+<p>看看控制台输出，手机内所有可用的Share Extension的bundle Id 都出来了。<br>
+<img src="https://i.loli.net/2020/01/08/TOh7p4qzlMokFxV.png" alt="img" loading="lazy"></p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://fanyuecheng.github.io/tag/O7CC6q2Ky/" class="tag">
+                    iOS
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://fanyuecheng.github.io/post/wo-kan-nsoperation-he-nsoperationqueue/">
+                  <h3 class="post-title">
+                    我看NSOperation和NSOperationQueue
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: '086416f3d68dc7e21533',
+        clientSecret: 'dde43685f6b0fe5d2037ef7ac3ddc6dc5e0d1dca',
+        repo: 'fanyuecheng.github.io',
+        owner: 'fanyuecheng',
+        admin: ['fanyuecheng'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>

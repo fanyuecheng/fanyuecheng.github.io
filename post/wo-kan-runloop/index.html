@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>我看RunLoop | fanyuecheng&#39;s blog</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://fanyuecheng.github.io/favicon.ico?v=1696999272056">
+<link rel="stylesheet" href="https://fanyuecheng.github.io/styles/main.css">
+
+
+  
+    <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css" />
+  
+
+  
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="iOS中的RunLoop
+iOS 系统中，提供了两种RunLoop：NSRunLoop 和 CFRunLoopRef。
+CFRunLoopRef 是在 CoreFoundation 框架内的，它提供了纯 C 函数的 API，所有这些 API..." />
+    <meta name="keywords" content="iOS" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://fanyuecheng.github.io">
+        <img src="https://fanyuecheng.github.io/images/avatar.png?v=1696999272056" class="site-logo">
+        <h1 class="site-title">fanyuecheng&#39;s blog</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            首页
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            归档
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            标签
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            关于
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      温故而知新
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://fanyuecheng.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">我看RunLoop</h2>
+            <div class="post-date">2021-01-05</div>
+            
+            <div class="post-content" v-pre>
+              <h2 id="ios中的runloop">iOS中的RunLoop</h2>
+<p>iOS 系统中，提供了两种RunLoop：NSRunLoop 和 CFRunLoopRef。<br>
+CFRunLoopRef 是在 CoreFoundation 框架内的，它提供了纯 C 函数的 API，所有这些 API 都是线程安全的。<br>
+NSRunLoop 是基于 CFRunLoopRef 的封装，提供了面向对象的 API，但是这些 API 不是线程安全的。</p>
+<p>RunLoop使用场景<br>
+保持线程的存活，而不是线性的执行完任务就退出<br>
+1). 当线程不开启RunLoop<br>
+例子：</p>
+<pre><code>@interface TestThread : NSThread  
+@end  
+
+@implementation TestThread  
+- (void)dealloc {  
+    NSLog(@&quot;%@线程被释放了&quot;, self.name);  
+}  
+@end  
+
+@implementation ViewController  
+- (void)viewDidLoad {  
+    [super viewDidLoad];
+
+    NSLog(@&quot;%@----开辟子线程&quot;, [NSThread currentThread]);
+
+    TestThread *testThread = [[TestThread alloc] initWithTarget:self selector:@selector(testThreadTodo) object:nil];
+    testThread.name = @&quot;testThread&quot;;
+    [testThread start]; 
+}
+
+- (void)testThreadTodo {
+    NSLog(@&quot;%@----执行子线程任务&quot;, [NSThread currentThread]);
+}
+@end  
+</code></pre>
+<p>控制台输出：</p>
+<pre><code>&lt;NSThread: 0x6000014c7680&gt;{number = 1, name = main}----开辟子线程  
+&lt;TestThread: 0x6000014aaf80&gt;{number = 3, name = testThread}----开始执行子线程任务  
+testThread线程被释放了
+</code></pre>
+<p>即：子线程执行完操作就自动退出。</p>
+<p>2). 当线程开启RunLoop<br>
+若子线程的操作是偶尔或者只需要执行一次的话，像上面那样就没什么问题。但是如果这个操作需要频繁执行，那么按照上面那样的逻辑，我们就需要频繁创建子线程，这样很消耗资源。<br>
+我们试试把线程“保持”起来，使控制器持有它，让它在需要的时候执行任务，不需要的时候就啥都不干。<br>
+此时，子线程在执行任务结束后不会被释放，但是若再次调用start方法，则程序会崩溃。</p>
+<pre><code>*** Terminating app due to uncaught exception 'NSInvalidArgumentException', reason: '*** -[TestThread start]: attempt to start the thread again'
+</code></pre>
+<p>执行完任务后，虽然线程没有被释放，还处于内存中，但是它处于死亡状态（当线程的任务结束后就会进入这种状态）。苹果不允许在线程死亡后再次开启。<br>
+为了让线程不进入死亡状态，只有让任务一直在进行中，可用一个死循环完成这种效果，但是子线程会不分时间地点场合的疯狂执行任务，并不可取。</p>
+<p>此时不持有线程，使用runloop：</p>
+<pre><code>- (void)testThreadTodo {
+    NSLog(@&quot;%@----开始执行子线程任务&quot;, [NSThread currentThread]);
+    //获取当前子线程的RunLoop
+    NSRunLoop *runLoop = [NSRunLoop currentRunLoop];
+    [runLoop addPort:[NSMachPort port] forMode:NSDefaultRunLoopMode];
+    //让RunLoop跑起来
+    [runLoop run];
+    NSLog(@&quot;%@----执行子线程任务结束&quot;, [NSThread currentThread]);
+}
+</code></pre>
+<p>运行，控制台输出：</p>
+<pre><code>&lt;NSThread: 0x600001f79dc0&gt;{number = 1, name = main}----开辟子线程  
+&lt;TestThread: 0x600001f12400&gt;{number = 3, name = testThread}----开始执行子线程任务
+</code></pre>
+<p>最后的打印却没有输出，说明任务并没有结束，线程也没有销毁。<br>
+RunLoop本质就是个Event Loop的do while循环，所以运行到[runLoop run]以后子线程就一直在进行接受消息-&gt;等待-&gt;处理的循环。所以不会运行[runLoop run]之后的代码，也就不会因为任务结束导致线程死亡进而销毁。这也就是我们最常使用RunLoop的场景之一，即保持线程的存活，而不是线性的执行完任务就退出。</p>
+<p>3). 小结<br>
+何为RunLoop<br>
+顾名思义就是跑圈，他的本质就是一个do，while循环，当有事做时就做事，没事做时就休眠。</p>
+<h2 id="runloop和线程的关系">RunLoop和线程的关系</h2>
+<p>RunLoop是保证线程不会退出，并且能在不处理消息的时候让线程休眠，节约资源，在接收到消息的时候唤醒线程做出对应处理的消息循环机制。它是寄生于线程的，线程和RunLoop之间一一对应，主线程的RunLoop会在App运行的时自动运行，子线程需要手动获取运行，第一次获取时，才会去创建。</p>
+<p>4). 参考<br>
+更深层次就不再赘述了，可参考大神博客：<br>
+<a href="https://blog.ibireme.com/2015/05/18/runloop/">深入理解RunLoop</a><br>
+<a href="https://www.jianshu.com/p/18afd628ac43">iOS RunLoop入门小结</a></p>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://fanyuecheng.github.io/tag/O7CC6q2Ky/" class="tag">
+                    iOS
+                  </a>
+                
+              </div>
+            
+            
+              <div class="next-post">
+                <div class="next">下一篇</div>
+                <a href="https://fanyuecheng.github.io/post/wo-yong-runtime/">
+                  <h3 class="post-title">
+                    我用runtime
+                  </h3>
+                </a>
+              </div>
+            
+
+            
+              
+                <div id="gitalk-container" data-aos="fade-in"></div>
+              
+
+              
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+  
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+
+      var gitalk = new Gitalk({
+        clientID: '086416f3d68dc7e21533',
+        clientSecret: 'dde43685f6b0fe5d2037ef7ac3ddc6dc5e0d1dca',
+        repo: 'fanyuecheng.github.io',
+        owner: 'fanyuecheng',
+        admin: ['fanyuecheng'],
+        id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+        distractionFreeMode: false  // Facebook-like distraction free mode
+      })
+
+      gitalk.render('gitalk-container')
+
+    </script>
+  
+
+  
+
+
+
+
+  </body>
+</html>
